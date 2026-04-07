@@ -3,3 +3,5 @@ build/
 *.dylib
 *.o
 *.so
+ext/
+build/_deps/
