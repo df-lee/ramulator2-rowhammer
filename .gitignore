@@ -1,6 +1,5 @@
+.DS_Store
 build/
-.vscode
-ext/
-ramulator2
+*.dylib
+*.o
 *.so
-autobuild.sh
