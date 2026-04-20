@@ -54,26 +54,37 @@ MemorySystem:
       - ControllerPlugin:
 
           impl: UniformTRR
-          num_rows: 32768
 
-          # Threshold
-          enable_trr: true
-          trr_threshold: 100
-          flip_threshold: 4
+          protection_family: trr
+          protection_scope: uniform
+
+          num_rows: 32768
+          compress_row_space: false
           hammer_threshold: 1
 
-          # Budget
-          budget_window: 1000
-          budget_per_window: 100
+          trr_threshold: 3
+          trr_threshold_critical: 2
+          trr_threshold_noncritical: 4
 
-          # Probability
-          flip_mode: probabilistic
+          para_p_uniform: 0.01
+          para_p_critical: 0.10
+          para_p_noncritical: 0.01
+
+          critical_row_stride: 16
+          critical_row_offset: 0
+
+          flip_mode: deterministic
+          flip_threshold: 4
+
           prob_function: linear
-          prob_flip_start: 1
-          prob_alpha: 0.5
+          prob_flip_start: 2
+          prob_alpha: 0.2
           prob_k: 1.0
           prob_midpoint: 4.0
           random_seed: 12345
+
+          budget_window: 1000
+          budget_per_window: 32
 
           debug: true
 

@@ -1,0 +1,92 @@
+Frontend:
+
+  impl: SimpleO3
+  clock_ratio: 8
+  num_expected_insts: 500000
+
+  traces:
+    - ${TRACE}
+
+  Translation:
+
+    impl: RandomTranslation
+    max_addr: 2147483648
+
+MemorySystem:
+
+  impl: GenericDRAM
+  clock_ratio: 3
+
+  DRAM:
+
+    impl: DDR4
+
+    org:
+
+      preset: DDR4_8Gb_x8
+      channel: 1
+      rank: 2
+
+    timing:
+
+      preset: DDR4_2400R
+
+  Controller:
+
+    impl: Generic
+
+    Scheduler:
+
+      impl: FRFCFS
+
+    RefreshManager:
+
+      impl: AllBank
+
+    RowPolicy:
+
+      impl: ClosedRowPolicy
+      cap: 4
+
+    plugins:
+
+      - ControllerPlugin:
+
+          impl: UniformTRR
+
+          protection_family: ${PROTECTION_FAMILY}
+          protection_scope: ${PROTECTION_SCOPE}
+
+          num_rows: ${NUM_ROWS}
+          compress_row_space: ${COMPRESS_ROW_SPACE}
+          hammer_threshold: ${HAMMER_THRESHOLD}
+
+          trr_threshold: ${TRR_THRESHOLD}
+          trr_threshold_critical: ${TRR_THRESHOLD_CRITICAL}
+          trr_threshold_noncritical: ${TRR_THRESHOLD_NONCRITICAL}
+
+          para_p_uniform: ${PARA_P_UNIFORM}
+          para_p_critical: ${PARA_P_CRITICAL}
+          para_p_noncritical: ${PARA_P_NONCRITICAL}
+
+          critical_row_stride: ${CRITICAL_ROW_STRIDE}
+          critical_row_offset: ${CRITICAL_ROW_OFFSET}
+
+          flip_mode: ${FLIP_MODE}
+          flip_threshold: ${FLIP_THRESHOLD}
+
+          prob_function: ${PROB_FUNCTION}
+          prob_flip_start: ${PROB_FLIP_START}
+          prob_alpha: ${PROB_ALPHA}
+          prob_k: ${PROB_K}
+          prob_midpoint: ${PROB_MIDPOINT}
+          random_seed: ${RANDOM_SEED}
+
+          budget_window: ${BUDGET_WINDOW}
+          budget_per_window: ${BUDGET_PER_WINDOW}
+
+          debug: ${DEBUG}
+
+  AddrMapper:
+
+    impl: RoBaRaCoCh
