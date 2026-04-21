@@ -5,7 +5,7 @@ Frontend:
   num_expected_insts: 500000
 
   traces:
-    - example_rh_physaddr.trace
+    - /Users/df/RoWHammer/ramulator2/example_rh_physaddr.trace
 
   Translation:
 
@@ -62,12 +62,12 @@ MemorySystem:
           hammer_threshold: 4
 
           trr_threshold: 3
-          trr_threshold_critical: 2
-          trr_threshold_noncritical: 4
+          trr_threshold_critical: 3
+          trr_threshold_noncritical: 10
 
           para_p_uniform: 0.01
-          para_p_critical: 0.10
-          para_p_noncritical: 0.01
+          para_p_critical: 0.18
+          para_p_noncritical: 0.02
 
           critical_row_stride: 16
           critical_row_offset: 0

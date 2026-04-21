@@ -1,25 +1,25 @@
 Frontend:
   impl: SimpleO3
-  cycles_recorded_core_0: 501673
+  cycles_recorded_core_0: 501819
   llc_write_misses: 0
-  llc_mshr_unavailable: 1055
-  llc_read_misses: 1139
+  llc_mshr_unavailable: 1202
+  llc_read_misses: 1286
   llc_write_access: 0
-  memory_access_cycles_recorded_core_0: 664
-  llc_read_access: 501102
+  memory_access_cycles_recorded_core_0: 719
+  llc_read_access: 501249
   llc_eviction: 0
   num_expected_insts: 500000
   Translation:
     impl: RandomTranslation
 
 
-[UniformTRR][summary] openings=75 hammer_events=15 trr_events=0 para_events=3 bitflips=0 critical_bitflips=0 noncritical_bitflips=0 critical_trr_events=0 noncritical_trr_events=0 critical_para_events=0 noncritical_para_events=3 budget_blocks=0 budget_resets=0 prob_checks=2 prob_successes=0 para_checks=29 para_successes=3 budget_used_final_window=0/32
+[UniformTRR][summary] openings=76 hammer_events=15 trr_events=0 para_events=4 bitflips=0 critical_bitflips=0 noncritical_bitflips=0 critical_trr_events=0 noncritical_trr_events=0 critical_para_events=0 noncritical_para_events=4 budget_blocks=0 budget_resets=0 prob_checks=2 prob_successes=0 para_checks=29 para_successes=4 budget_used_final_window=0/32
 MemorySystem:
   impl: GenericDRAM
   total_num_other_requests: 0
   total_num_write_requests: 0
   total_num_read_requests: 72
-  memory_system_cycles: 188127
+  memory_system_cycles: 188182
   DRAM:
     impl: DDR4
   AddrMapper:
@@ -30,29 +30,29 @@ MemorySystem:
     impl: Generic
     id: Channel 0
     num_read_reqs_0: 72
-    queue_len_avg_0: 0.0330255628
+    queue_len_avg_0: 0.039031364
     read_row_conflicts_core_0: 42
     read_row_hits_core_0: 0
     write_row_misses_0: 0
     row_misses_0: 30
     read_row_misses_core_0: 30
     write_queue_len_0: 0
-    read_queue_len_avg_0: 0.0303358901
-    avg_read_latency_0: 100.875
+    read_queue_len_avg_0: 0.0350033492
+    avg_read_latency_0: 113.097221
     read_row_misses_0: 30
-    priority_queue_len_0: 506
+    priority_queue_len_0: 758
     read_row_hits_0: 0
-    read_latency_0: 7263
-    priority_queue_len_avg_0: 0.0026896724
+    read_latency_0: 8143
+    priority_queue_len_avg_0: 0.0040280153
     row_conflicts_0: 42
     write_row_conflicts_0: 0
     num_write_reqs_0: 0
     write_queue_len_avg_0: 0
-    queue_len_0: 6213
+    queue_len_0: 7345
     num_other_reqs_0: 0
     write_row_hits_0: 0
     row_hits_0: 0
-    read_queue_len_0: 5707
+    read_queue_len_0: 6587
     read_row_conflicts_0: 42
     Scheduler:
       impl: FRFCFS

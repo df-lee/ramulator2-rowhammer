@@ -13,21 +13,17 @@ run_case() {
   env CASE_NAME="${case_name}" TRACE="${TRACE}" "$@" "${RUN_SCRIPT}"
 }
 
-prob_tag() {
-  local p="$1"
-  # 0.01 -> p0p01, 0.10 -> p0p10
-  printf "%s" "${p}" | sed 's/\./p/g'
-}
+# --------------------------------------------------
+# Fault-model sweep axes
+# --------------------------------------------------
+HAMMER_THRESHOLDS=(1 2 3 4)
+PROB_FLIP_STARTS=(1 2 3 4)
 
-# --------------------------------------------------
-# Representative fault settings
-# --------------------------------------------------
-FAULT_SETTINGS=(
-  "h1_ps1_sigmoid_nr64:1:1:sigmoid:64"
-  "h1_ps1_sigmoid_nr128:1:1:sigmoid:128"
-  "h1_ps1_linear_nr64:1:1:linear:64"
-  "h1_ps2_sigmoid_nr64:1:2:sigmoid:64"
-)
+# Slightly fuller row-space sweep
+NUM_ROWS_LIST=(1024 512 256 128 64)
+
+# Fix the probability function to sigmoid
+PROB_FUNCTION=sigmoid
 
 # --------------------------------------------------
 # Common fixed knobs
@@ -51,88 +47,90 @@ PROB_K=1.0
 PROB_MIDPOINT=4.0
 
 # --------------------------------------------------
-# Security-aware TRR parameter grid (stabilized)
+# Fixed policy knobs for fault-model sweep
+# Chosen from the best / most representative timing-aware settings
 # --------------------------------------------------
-TRR_THRESHOLD_UNIFORM=3
-TRR_CRITICAL_LIST=(2 3 4 5)
-TRR_NONCRITICAL_LIST=(2 3 4 5 6 7 8 9 10)
 
-# --------------------------------------------------
-# Security-aware PARA parameter grid (stabilized)
-# --------------------------------------------------
+# Uniform TRR
+TRR_THRESHOLD_UNIFORM=3
+
+# Security-aware TRR
+TRR_THRESHOLD_CRITICAL=3
+TRR_THRESHOLD_NONCRITICAL=10
+
+# Uniform PARA
 PARA_P_UNIFORM=0.01
-PARA_PROB_LIST=(
-  0.01 0.02 0.03 0.04 0.05
-  0.06 0.07 0.08 0.09 0.10
-  0.12 0.14 0.16 0.18 0.20
-)
+
+# Security-aware PARA
+PARA_P_CRITICAL=0.18
+PARA_P_NONCRITICAL=0.02
 
 # --------------------------------------------------
 # Main sweep
 # --------------------------------------------------
-for ENTRY in "${FAULT_SETTINGS[@]}"; do
-  IFS=':' read -r FAULT_TAG HAMMER PSTART PFUNC NROWS <<<"${ENTRY}"
+for HAMMER in "${HAMMER_THRESHOLDS[@]}"; do
+  for PSTART in "${PROB_FLIP_STARTS[@]}"; do
+    for NROWS in "${NUM_ROWS_LIST[@]}"; do
 
-  echo "============================================================"
-  echo "Running fault setting: ${FAULT_TAG}"
-  echo "  hammer_threshold = ${HAMMER}"
-  echo "  prob_flip_start  = ${PSTART}"
-  echo "  prob_function    = ${PFUNC}"
-  echo "  num_rows         = ${NROWS}"
-  echo "============================================================"
+      FAULT_TAG="h${HAMMER}_ps${PSTART}_${PROB_FUNCTION}_nr${NROWS}"
 
-  # ------------------------------------------------
-  # A) TRR grid sweep
-  # ------------------------------------------------
-  for TC in "${TRR_CRITICAL_LIST[@]}"; do
-    for TN in "${TRR_NONCRITICAL_LIST[@]}"; do
+      echo "============================================================"
+      echo "Running fault setting: ${FAULT_TAG}"
+      echo "  hammer_threshold = ${HAMMER}"
+      echo "  prob_flip_start  = ${PSTART}"
+      echo "  prob_function    = ${PROB_FUNCTION}"
+      echo "  num_rows         = ${NROWS}"
+      echo "============================================================"
 
-      # Uniform TRR baseline: run once per fault setting
-      if [[ "${TC}" == "${TRR_CRITICAL_LIST[0]}" && "${TN}" == "${TRR_NONCRITICAL_LIST[0]}" ]]; then
-        run_case "trr_uniform_${FAULT_TAG}" \
-          PROTECTION_FAMILY=trr \
-          PROTECTION_SCOPE=uniform \
-          NUM_ROWS="${NROWS}" \
-          COMPRESS_ROW_SPACE="${COMPRESS_ROW_SPACE}" \
-          HAMMER_THRESHOLD="${HAMMER}" \
-          TRR_THRESHOLD="${TRR_THRESHOLD_UNIFORM}" \
-          TRR_THRESHOLD_CRITICAL=2 \
-          TRR_THRESHOLD_NONCRITICAL=4 \
-          PARA_P_UNIFORM="${PARA_P_UNIFORM}" \
-          PARA_P_CRITICAL=0.10 \
-          PARA_P_NONCRITICAL=0.01 \
-          CRITICAL_ROW_STRIDE="${CRITICAL_ROW_STRIDE}" \
-          CRITICAL_ROW_OFFSET="${CRITICAL_ROW_OFFSET}" \
-          FLIP_MODE="${FLIP_MODE}" \
-          FLIP_THRESHOLD="${FLIP_THRESHOLD}" \
-          PROB_FUNCTION="${PFUNC}" \
-          PROB_FLIP_START="${PSTART}" \
-          PROB_ALPHA="${PROB_ALPHA}" \
-          PROB_K="${PROB_K}" \
-          PROB_MIDPOINT="${PROB_MIDPOINT}" \
-          RANDOM_SEED="${RANDOM_SEED}" \
-          BUDGET_WINDOW="${BUDGET_WINDOW}" \
-          BUDGET_PER_WINDOW="${BUDGET_PER_WINDOW}" \
-          DEBUG="${DEBUG}"
-      fi
+      # ------------------------------------------------
+      # 1) Uniform TRR
+      # ------------------------------------------------
+      run_case "trr_uniform_${FAULT_TAG}" \
+        PROTECTION_FAMILY=trr \
+        PROTECTION_SCOPE=uniform \
+        NUM_ROWS="${NROWS}" \
+        COMPRESS_ROW_SPACE="${COMPRESS_ROW_SPACE}" \
+        HAMMER_THRESHOLD="${HAMMER}" \
+        TRR_THRESHOLD="${TRR_THRESHOLD_UNIFORM}" \
+        TRR_THRESHOLD_CRITICAL="${TRR_THRESHOLD_CRITICAL}" \
+        TRR_THRESHOLD_NONCRITICAL="${TRR_THRESHOLD_NONCRITICAL}" \
+        PARA_P_UNIFORM="${PARA_P_UNIFORM}" \
+        PARA_P_CRITICAL="${PARA_P_CRITICAL}" \
+        PARA_P_NONCRITICAL="${PARA_P_NONCRITICAL}" \
+        CRITICAL_ROW_STRIDE="${CRITICAL_ROW_STRIDE}" \
+        CRITICAL_ROW_OFFSET="${CRITICAL_ROW_OFFSET}" \
+        FLIP_MODE="${FLIP_MODE}" \
+        FLIP_THRESHOLD="${FLIP_THRESHOLD}" \
+        PROB_FUNCTION="${PROB_FUNCTION}" \
+        PROB_FLIP_START="${PSTART}" \
+        PROB_ALPHA="${PROB_ALPHA}" \
+        PROB_K="${PROB_K}" \
+        PROB_MIDPOINT="${PROB_MIDPOINT}" \
+        RANDOM_SEED="${RANDOM_SEED}" \
+        BUDGET_WINDOW="${BUDGET_WINDOW}" \
+        BUDGET_PER_WINDOW="${BUDGET_PER_WINDOW}" \
+        DEBUG="${DEBUG}"
 
-      run_case "trr_sec_${FAULT_TAG}_tc${TC}_tn${TN}" \
+      # ------------------------------------------------
+      # 2) Security-aware TRR
+      # ------------------------------------------------
+      run_case "trr_sec_${FAULT_TAG}" \
         PROTECTION_FAMILY=trr \
         PROTECTION_SCOPE=security_aware \
         NUM_ROWS="${NROWS}" \
         COMPRESS_ROW_SPACE="${COMPRESS_ROW_SPACE}" \
         HAMMER_THRESHOLD="${HAMMER}" \
         TRR_THRESHOLD="${TRR_THRESHOLD_UNIFORM}" \
-        TRR_THRESHOLD_CRITICAL="${TC}" \
-        TRR_THRESHOLD_NONCRITICAL="${TN}" \
+        TRR_THRESHOLD_CRITICAL="${TRR_THRESHOLD_CRITICAL}" \
+        TRR_THRESHOLD_NONCRITICAL="${TRR_THRESHOLD_NONCRITICAL}" \
         PARA_P_UNIFORM="${PARA_P_UNIFORM}" \
-        PARA_P_CRITICAL=0.10 \
-        PARA_P_NONCRITICAL=0.01 \
+        PARA_P_CRITICAL="${PARA_P_CRITICAL}" \
+        PARA_P_NONCRITICAL="${PARA_P_NONCRITICAL}" \
         CRITICAL_ROW_STRIDE="${CRITICAL_ROW_STRIDE}" \
         CRITICAL_ROW_OFFSET="${CRITICAL_ROW_OFFSET}" \
         FLIP_MODE="${FLIP_MODE}" \
         FLIP_THRESHOLD="${FLIP_THRESHOLD}" \
-        PROB_FUNCTION="${PFUNC}" \
+        PROB_FUNCTION="${PROB_FUNCTION}" \
         PROB_FLIP_START="${PSTART}" \
         PROB_ALPHA="${PROB_ALPHA}" \
         PROB_K="${PROB_K}" \
@@ -141,63 +139,56 @@ for ENTRY in "${FAULT_SETTINGS[@]}"; do
         BUDGET_WINDOW="${BUDGET_WINDOW}" \
         BUDGET_PER_WINDOW="${BUDGET_PER_WINDOW}" \
         DEBUG="${DEBUG}"
-    done
-  done
 
-  # ------------------------------------------------
-  # B) PARA grid sweep
-  # ------------------------------------------------
-  for PC in "${PARA_PROB_LIST[@]}"; do
-    for PN in "${PARA_PROB_LIST[@]}"; do
-      PC_TAG="$(prob_tag "${PC}")"
-      PN_TAG="$(prob_tag "${PN}")"
+      # ------------------------------------------------
+      # 3) Uniform PARA
+      # ------------------------------------------------
+      run_case "para_uniform_${FAULT_TAG}" \
+        PROTECTION_FAMILY=para \
+        PROTECTION_SCOPE=uniform \
+        NUM_ROWS="${NROWS}" \
+        COMPRESS_ROW_SPACE="${COMPRESS_ROW_SPACE}" \
+        HAMMER_THRESHOLD="${HAMMER}" \
+        TRR_THRESHOLD="${TRR_THRESHOLD_UNIFORM}" \
+        TRR_THRESHOLD_CRITICAL="${TRR_THRESHOLD_CRITICAL}" \
+        TRR_THRESHOLD_NONCRITICAL="${TRR_THRESHOLD_NONCRITICAL}" \
+        PARA_P_UNIFORM="${PARA_P_UNIFORM}" \
+        PARA_P_CRITICAL="${PARA_P_CRITICAL}" \
+        PARA_P_NONCRITICAL="${PARA_P_NONCRITICAL}" \
+        CRITICAL_ROW_STRIDE="${CRITICAL_ROW_STRIDE}" \
+        CRITICAL_ROW_OFFSET="${CRITICAL_ROW_OFFSET}" \
+        FLIP_MODE="${FLIP_MODE}" \
+        FLIP_THRESHOLD="${FLIP_THRESHOLD}" \
+        PROB_FUNCTION="${PROB_FUNCTION}" \
+        PROB_FLIP_START="${PSTART}" \
+        PROB_ALPHA="${PROB_ALPHA}" \
+        PROB_K="${PROB_K}" \
+        PROB_MIDPOINT="${PROB_MIDPOINT}" \
+        RANDOM_SEED="${RANDOM_SEED}" \
+        BUDGET_WINDOW="${BUDGET_WINDOW}" \
+        BUDGET_PER_WINDOW="${BUDGET_PER_WINDOW}" \
+        DEBUG="${DEBUG}"
 
-      # Uniform PARA baseline: run once per fault setting
-      if [[ "${PC}" == "${PARA_PROB_LIST[0]}" && "${PN}" == "${PARA_PROB_LIST[0]}" ]]; then
-        run_case "para_uniform_${FAULT_TAG}" \
-          PROTECTION_FAMILY=para \
-          PROTECTION_SCOPE=uniform \
-          NUM_ROWS="${NROWS}" \
-          COMPRESS_ROW_SPACE="${COMPRESS_ROW_SPACE}" \
-          HAMMER_THRESHOLD="${HAMMER}" \
-          TRR_THRESHOLD="${TRR_THRESHOLD_UNIFORM}" \
-          TRR_THRESHOLD_CRITICAL=2 \
-          TRR_THRESHOLD_NONCRITICAL=4 \
-          PARA_P_UNIFORM="${PARA_P_UNIFORM}" \
-          PARA_P_CRITICAL=0.10 \
-          PARA_P_NONCRITICAL=0.01 \
-          CRITICAL_ROW_STRIDE="${CRITICAL_ROW_STRIDE}" \
-          CRITICAL_ROW_OFFSET="${CRITICAL_ROW_OFFSET}" \
-          FLIP_MODE="${FLIP_MODE}" \
-          FLIP_THRESHOLD="${FLIP_THRESHOLD}" \
-          PROB_FUNCTION="${PFUNC}" \
-          PROB_FLIP_START="${PSTART}" \
-          PROB_ALPHA="${PROB_ALPHA}" \
-          PROB_K="${PROB_K}" \
-          PROB_MIDPOINT="${PROB_MIDPOINT}" \
-          RANDOM_SEED="${RANDOM_SEED}" \
-          BUDGET_WINDOW="${BUDGET_WINDOW}" \
-          BUDGET_PER_WINDOW="${BUDGET_PER_WINDOW}" \
-          DEBUG="${DEBUG}"
-      fi
-
-      run_case "para_sec_${FAULT_TAG}_pc${PC_TAG}_pn${PN_TAG}" \
+      # ------------------------------------------------
+      # 4) Security-aware PARA
+      # ------------------------------------------------
+      run_case "para_sec_${FAULT_TAG}" \
         PROTECTION_FAMILY=para \
         PROTECTION_SCOPE=security_aware \
         NUM_ROWS="${NROWS}" \
         COMPRESS_ROW_SPACE="${COMPRESS_ROW_SPACE}" \
         HAMMER_THRESHOLD="${HAMMER}" \
         TRR_THRESHOLD="${TRR_THRESHOLD_UNIFORM}" \
-        TRR_THRESHOLD_CRITICAL=2 \
-        TRR_THRESHOLD_NONCRITICAL=4 \
+        TRR_THRESHOLD_CRITICAL="${TRR_THRESHOLD_CRITICAL}" \
+        TRR_THRESHOLD_NONCRITICAL="${TRR_THRESHOLD_NONCRITICAL}" \
         PARA_P_UNIFORM="${PARA_P_UNIFORM}" \
-        PARA_P_CRITICAL="${PC}" \
-        PARA_P_NONCRITICAL="${PN}" \
+        PARA_P_CRITICAL="${PARA_P_CRITICAL}" \
+        PARA_P_NONCRITICAL="${PARA_P_NONCRITICAL}" \
         CRITICAL_ROW_STRIDE="${CRITICAL_ROW_STRIDE}" \
         CRITICAL_ROW_OFFSET="${CRITICAL_ROW_OFFSET}" \
         FLIP_MODE="${FLIP_MODE}" \
         FLIP_THRESHOLD="${FLIP_THRESHOLD}" \
-        PROB_FUNCTION="${PFUNC}" \
+        PROB_FUNCTION="${PROB_FUNCTION}" \
         PROB_FLIP_START="${PSTART}" \
         PROB_ALPHA="${PROB_ALPHA}" \
         PROB_K="${PROB_K}" \
@@ -206,8 +197,9 @@ for ENTRY in "${FAULT_SETTINGS[@]}"; do
         BUDGET_WINDOW="${BUDGET_WINDOW}" \
         BUDGET_PER_WINDOW="${BUDGET_PER_WINDOW}" \
         DEBUG="${DEBUG}"
+
     done
   done
 done
 
-echo "All sweep cases completed."
+echo "All fault-model sweep cases completed."

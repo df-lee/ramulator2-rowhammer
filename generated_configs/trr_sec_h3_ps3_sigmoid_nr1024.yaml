@@ -1,0 +1,92 @@
+Frontend:
+
+  impl: SimpleO3
+  clock_ratio: 8
+  num_expected_insts: 500000
+
+  traces:
+    - /Users/df/RoWHammer/ramulator2/example_rh_physaddr.trace
+
+  Translation:
+
+    impl: RandomTranslation
+    max_addr: 2147483648
+
+MemorySystem:
+
+  impl: GenericDRAM
+  clock_ratio: 3
+
+  DRAM:
+
+    impl: DDR4
+
+    org:
+
+      preset: DDR4_8Gb_x8
+      channel: 1
+      rank: 2
+
+    timing:
+
+      preset: DDR4_2400R
+
+  Controller:
+
+    impl: Generic
+
+    Scheduler:
+
+      impl: FRFCFS
+
+    RefreshManager:
+
+      impl: AllBank
+
+    RowPolicy:
+
+      impl: ClosedRowPolicy
+      cap: 4
+
+    plugins:
+
+      - ControllerPlugin:
+
+          impl: UniformTRR
+
+          protection_family: trr
+          protection_scope: security_aware
+
+          num_rows: 1024
+          compress_row_space: true
+          hammer_threshold: 3
+
+          trr_threshold: 3
+          trr_threshold_critical: 3
+          trr_threshold_noncritical: 10
+
+          para_p_uniform: 0.01
+          para_p_critical: 0.18
+          para_p_noncritical: 0.02
+
+          critical_row_stride: 16
+          critical_row_offset: 0
+
+          flip_mode: probabilistic
+          flip_threshold: 4
+
+          prob_function: sigmoid
+          prob_flip_start: 3
+          prob_alpha: 0.2
+          prob_k: 1.0
+          prob_midpoint: 4.0
+          random_seed: 12345
+
+          budget_window: 1000
+          budget_per_window: 32
+
+          debug: false
+
+  AddrMapper:
+
+    impl: RoBaRaCoCh

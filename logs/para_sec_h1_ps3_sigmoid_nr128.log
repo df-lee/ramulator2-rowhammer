@@ -1,25 +1,25 @@
 Frontend:
   impl: SimpleO3
-  cycles_recorded_core_0: 502371
+  cycles_recorded_core_0: 502651
   llc_write_misses: 0
-  llc_mshr_unavailable: 1887
-  llc_read_misses: 1973
+  llc_mshr_unavailable: 2410
+  llc_read_misses: 2493
   llc_write_access: 0
-  memory_access_cycles_recorded_core_0: 926
-  llc_read_access: 501934
+  memory_access_cycles_recorded_core_0: 1031
+  llc_read_access: 502457
   llc_eviction: 0
   num_expected_insts: 500000
   Translation:
     impl: RandomTranslation
 
 
-[UniformTRR][summary] openings=78 hammer_events=78 trr_events=0 para_events=6 bitflips=4 critical_bitflips=0 noncritical_bitflips=4 critical_trr_events=0 noncritical_trr_events=0 critical_para_events=0 noncritical_para_events=6 budget_blocks=0 budget_resets=0 prob_checks=18 prob_successes=4 para_checks=154 para_successes=6 budget_used_final_window=0/32
+[UniformTRR][summary] openings=80 hammer_events=80 trr_events=0 para_events=8 bitflips=4 critical_bitflips=0 noncritical_bitflips=4 critical_trr_events=0 noncritical_trr_events=0 critical_para_events=1 noncritical_para_events=7 budget_blocks=0 budget_resets=0 prob_checks=17 prob_successes=4 para_checks=158 para_successes=8 budget_used_final_window=0/32
 MemorySystem:
   impl: GenericDRAM
   total_num_other_requests: 0
   total_num_write_requests: 0
   total_num_read_requests: 72
-  memory_system_cycles: 188389
+  memory_system_cycles: 188494
   DRAM:
     impl: DDR4
   AddrMapper:
@@ -30,30 +30,30 @@ MemorySystem:
     impl: Generic
     id: Channel 0
     num_read_reqs_0: 72
-    queue_len_avg_0: 0.0619834475
-    read_row_conflicts_core_0: 41
+    queue_len_avg_0: 0.0745169595
+    read_row_conflicts_core_0: 40
     read_row_hits_core_0: 0
     write_row_misses_0: 0
-    row_misses_0: 31
-    read_row_misses_core_0: 31
+    row_misses_0: 32
+    read_row_misses_core_0: 32
     write_queue_len_0: 0
-    read_queue_len_avg_0: 0.0569725409
-    avg_read_latency_0: 170.694443
-    read_row_misses_0: 31
-    priority_queue_len_0: 944
+    read_queue_len_avg_0: 0.0673973709
+    avg_read_latency_0: 198.472229
+    read_row_misses_0: 32
+    priority_queue_len_0: 1342
     read_row_hits_0: 0
-    read_latency_0: 12290
-    priority_queue_len_avg_0: 0.00501090847
-    row_conflicts_0: 41
+    read_latency_0: 14290
+    priority_queue_len_avg_0: 0.00711958995
+    row_conflicts_0: 40
     write_row_conflicts_0: 0
     num_write_reqs_0: 0
     write_queue_len_avg_0: 0
-    queue_len_0: 11677
+    queue_len_0: 14046
     num_other_reqs_0: 0
     write_row_hits_0: 0
     row_hits_0: 0
-    read_queue_len_0: 10733
-    read_row_conflicts_0: 41
+    read_queue_len_0: 12704
+    read_row_conflicts_0: 40
     Scheduler:
       impl: FRFCFS
     RefreshManager:
